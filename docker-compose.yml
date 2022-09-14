@@ -10,17 +10,17 @@ services:
         - "6222:6222"
         - "8222:8222"
 
-    mongo:
+    mongo-db-raw:
       image: mongo
-      container_name: mongo-db
+      container_name: mongo-db-raw
       ports:
         - 27017:27017
       environment:
         MONGO_INITDB_ROOT_USERNAME: footballiot
         MONGO_INITDB_ROOT_PASSWORD: footballiot
 
-    mongo-express:
-      container_name: mongo-gui
+    mongo-gui-raw:
+      container_name: mongo-gui-raw
       image: mongo-express
       ports:
         - 8081:8081
