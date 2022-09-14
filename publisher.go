@@ -86,7 +86,9 @@ func readPlayerCsv(csvPath string) {
 			log.Fatal(err)
 		}
 		fmt.Println(data)
-		nc.Publish("football-iot.players", data)
+		subject := "football-iot.players." + line[1] // line[1] == player id
+
+		nc.Publish(subject, data)
 		time.Sleep(3 * time.Second)
 
 		// out := SensorReading{}
