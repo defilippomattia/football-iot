@@ -3,6 +3,5 @@
 For learning purposes. Technology used: go, nats, grafana, mongo
 
 # Architecture
-```
-todo
-```
+
+![alt text](https://github.com/defilippomattia/football-iot/blob/main/resources/architecture_diagram.png)
