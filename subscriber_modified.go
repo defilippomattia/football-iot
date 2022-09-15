@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"runtime"
 
 	"github.com/hamba/avro/v2"
@@ -31,15 +32,15 @@ func main() {
 
 	type SensorReadingDoc struct {
 		TAGID          int32     `bson:"tag_id"`
-		XPOSS          []float64 `bson:"x_positions"`
-		YPOSS          []float64 `bson:"y_positions"`
-		HEADINGS       []float64 `bson:"headings"`
-		DIRECTIONS     []float64 `bson:"directions"`
-		ENERGIES       []float64 `bson:"energies"`
-		SPEEDS         []float64 `bson:"speeds"`
-		TOTALDISTANCES []float64 `bson:"total_distances"`
+		XPOSS          []float64 `bson:"x_positions,omitempty"`
+		YPOSS          []float64 `bson:"y_positions,omitempty"`
+		HEADINGS       []float64 `bson:"headings,omitempty"`
+		DIRECTIONS     []float64 `bson:"directions,omitempty"`
+		ENERGIES       []float64 `bson:"energies,omitempty"`
+		SPEEDS         []float64 `bson:"speeds,omitempty"`
+		TOTALDISTANCES []float64 `bson:"total_distances,omitempty"`
 	}
-
+	// Id   primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	schema, err := avro.Parse(`{
 		"type": "record",
 		"name": "reading",
@@ -84,6 +85,7 @@ func main() {
 			//document doesn't exists with tagid...
 			out := SensorReadingDoc{
 				TAGID: out.TAGID,
+				//DIRECTIONS: []float64{},
 			}
 			_, err = coll.InsertOne(context.TODO(), out)
 			if err != nil {
@@ -97,6 +99,31 @@ func main() {
 			//result["directions"] = append(result["directions"], out.DIRECTION)
 			result["directions"] = out.DIRECTION
 			fmt.Println(result["directions"])
+
+			filter := bson.D{{"tag_id", out.TAGID}}
+			update := bson.D{
+				{
+					"$push", bson.D{
+						{"x_positions", math.Round(out.XPOS*100) / 100},
+						{"y_positions", math.Round(out.YPOS*100) / 100},
+						{"headings", math.Round(out.HEADING*100) / 100},
+						{"directions", math.Round(out.DIRECTION*100) / 100},
+						{"energies", math.Round(out.ENERGY*100) / 100},
+						{"speeds", math.Round(out.SPEED*100) / 100},
+						{"total_distances", math.Round(out.TOTALDISTANCE*100) / 100},
+					},
+				},
+			}
+			result, err := coll.UpdateOne(context.TODO(), filter, update)
+			if err != nil {
+				panic(err)
+			}
+			print(result)
+
+			// coll.updateOne(
+			// 	{ _id: 1 },
+			// 	{ $push: { scores: 89 } }
+			//  )
 
 		}
 		//
