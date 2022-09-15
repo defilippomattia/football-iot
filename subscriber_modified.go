@@ -85,7 +85,6 @@ func main() {
 			//document doesn't exists with tagid...
 			out := SensorReadingDoc{
 				TAGID: out.TAGID,
-				//DIRECTIONS: []float64{},
 			}
 			_, err = coll.InsertOne(context.TODO(), out)
 			if err != nil {
@@ -94,9 +93,6 @@ func main() {
 		} else {
 			//document exists, append to array
 			fmt.Println("doc exists")
-			//box.Items = append(box.Items, item)
-			//result.directions = append(result.directions, out.DIRECTION)
-			//result["directions"] = append(result["directions"], out.DIRECTION)
 			result["directions"] = out.DIRECTION
 			fmt.Println(result["directions"])
 
@@ -120,18 +116,8 @@ func main() {
 			}
 			print(result)
 
-			// coll.updateOne(
-			// 	{ _id: 1 },
-			// 	{ $push: { scores: 89 } }
-			//  )
-
 		}
-		//
 
-		// _, err = coll.InsertOne(context.TODO(), out)
-		// if err != nil {
-		// 	panic(err)
-		// }
 	})
 
 	runtime.Goexit()

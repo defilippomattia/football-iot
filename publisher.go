@@ -6,7 +6,8 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
+
+	//"time"
 
 	"github.com/hamba/avro/v2"
 	"github.com/nats-io/nats.go"
@@ -89,7 +90,7 @@ func readPlayerCsv(csvPath string) {
 		subject := "football-iot.players." + line[1] // line[1] == player id
 
 		nc.Publish(subject, data)
-		time.Sleep(3 * time.Second)
+		//time.Sleep(3 * time.Second)
 
 		// out := SensorReading{}
 		// err = avro.Unmarshal(schema, data, &out)
@@ -102,7 +103,27 @@ func readPlayerCsv(csvPath string) {
 }
 
 func main() {
+	playerCsvs := []string{
+		"./resources/sensor-data/player_1.csv",
+		"./resources/sensor-data/player_2.csv",
+		"./resources/sensor-data/player_3.csv",
+		"./resources/sensor-data/player_5.csv",
+		"./resources/sensor-data/player_6.csv",
+		"./resources/sensor-data/player_7.csv",
+		"./resources/sensor-data/player_8.csv",
+		"./resources/sensor-data/player_9.csv",
+		"./resources/sensor-data/player_10.csv",
+		"./resources/sensor-data/player_11.csv",
+		"./resources/sensor-data/player_12.csv",
+		"./resources/sensor-data/player_13.csv",
+		"./resources/sensor-data/player_14.csv",
+		"./resources/sensor-data/player_15.csv",
+	}
 
-	readPlayerCsv("./resources/sensor-data/player_x.csv")
+	for _, file := range playerCsvs {
+		go readPlayerCsv(file)
+
+	}
+	//readPlayerCsv("./resources/sensor-data/player_x.csv")
 
 }
