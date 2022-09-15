@@ -1,13 +1,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"runtime"
 
 	"github.com/hamba/avro/v2"
 	"github.com/nats-io/nats.go"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+const uri = "mongodb://footballiot:footballiot@localhost:27017/?maxPoolSize=20&w=majority"
 
 func main() {
 
@@ -51,8 +56,17 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		fmt.Println(out)
+
+		client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+		if err != nil {
+			panic(err)
+		}
+		coll := client.Database("footballiot").Collection("raw-sensor-readings")
+		_, err = coll.InsertOne(context.TODO(), out)
+		if err != nil {
+			panic(err)
+		}
 	})
 
 	runtime.Goexit()

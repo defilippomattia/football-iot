@@ -3,25 +3,23 @@ services:
     nats-server:
       image: nats:latest
       container_name: nats-server
-      environment:
-        - ORACLE_ALLOW_REMOTE=true
       ports:
         - "4222:4222"
         - "6222:6222"
         - "8222:8222"
 
-    mongo-db-raw:
+    mongo:
       image: mongo
-      container_name: mongo-db-raw
+      restart: always
       ports:
         - 27017:27017
       environment:
         MONGO_INITDB_ROOT_USERNAME: footballiot
         MONGO_INITDB_ROOT_PASSWORD: footballiot
 
-    mongo-gui-raw:
-      container_name: mongo-gui-raw
+    mongo-express:
       image: mongo-express
+      restart: always
       ports:
         - 8081:8081
       environment:
