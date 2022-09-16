@@ -52,7 +52,7 @@ func readPlayerCsv(csvPath string) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	defer csvFile.Close()
+	//defer csvFile.Close()
 
 	csvLines, err := csv.NewReader(csvFile).ReadAll()
 	if err != nil {
@@ -98,6 +98,7 @@ func readPlayerCsv(csvPath string) {
 		// 	log.Fatal(err)
 		// }
 		// fmt.Println(out)
+		csvFile.Close()
 	}
 
 }
@@ -106,14 +107,11 @@ func main() {
 	playerCsvs := []string{
 		"./resources/sensor-data/player_1.csv",
 		"./resources/sensor-data/player_2.csv",
-		"./resources/sensor-data/player_3.csv",
 		"./resources/sensor-data/player_5.csv",
-		"./resources/sensor-data/player_6.csv",
 		"./resources/sensor-data/player_7.csv",
 		"./resources/sensor-data/player_8.csv",
 		"./resources/sensor-data/player_9.csv",
 		"./resources/sensor-data/player_10.csv",
-		"./resources/sensor-data/player_11.csv",
 		"./resources/sensor-data/player_12.csv",
 		"./resources/sensor-data/player_13.csv",
 		"./resources/sensor-data/player_14.csv",
@@ -121,9 +119,6 @@ func main() {
 	}
 
 	for _, file := range playerCsvs {
-		go readPlayerCsv(file)
-
+		readPlayerCsv(file)
 	}
-	//readPlayerCsv("./resources/sensor-data/player_x.csv")
-
 }

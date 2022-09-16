@@ -1,34 +1,47 @@
 package main
 
 import (
-	"context"
-
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"encoding/csv"
+	"fmt"
+	"os"
 )
 
-const uri = "mongodb://footballiot:footballiot@localhost:27018/?maxPoolSize=20&w=majority"
+func readPlayerCsv(csvPath string) {
+	csvFile, err := os.Open(csvPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(csvFile)
+	csvLines, err := csv.NewReader(csvFile).ReadAll()
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(csvLines)
+
+}
 
 func main() {
-
-	type SensorReadingDoc struct {
-		TAGID          int32     `bson:"tag_id"`
-		XPOSS          []float64 `bson:"x_positions"`
-		YPOSS          []float64 `bson:"y_positions"`
-		HEADINGS       []float64 `bson:"headings"`
-		DIRECTIONS     []float64 `bson:"directions"`
-		ENERGIES       []float64 `bson:"energies"`
-		SPEEDS         []float64 `bson:"speeds"`
-		TOTALDISTANCES []float64 `bson:"total_distances"`
+	playerCsvs := []string{
+		"./resources/sensor-data/player_1.csv",
+		"./resources/sensor-data/player_2.csv",
+		"./resources/sensor-data/player_3.csv",
+		"./resources/sensor-data/player_5.csv",
+		"./resources/sensor-data/player_6.csv",
+		"./resources/sensor-data/player_7.csv",
+		"./resources/sensor-data/player_8.csv",
+		"./resources/sensor-data/player_9.csv",
+		"./resources/sensor-data/player_10.csv",
+		"./resources/sensor-data/player_11.csv",
+		"./resources/sensor-data/player_12.csv",
+		"./resources/sensor-data/player_13.csv",
+		"./resources/sensor-data/player_14.csv",
+		"./resources/sensor-data/player_15.csv",
 	}
 
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
-	coll := client.Database("footballiot").Collection("players")
-	out := SensorReadingDoc{}
+	for _, file := range playerCsvs {
 
-	_, err = coll.InsertOne(context.TODO(), out)
-	if err != nil {
-		panic(err)
+		readPlayerCsv(file)
+
 	}
-
+	//readPlayerCsv("./resources/sensor-data/player_x.csv")
 }

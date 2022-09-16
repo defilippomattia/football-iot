@@ -19,7 +19,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	for _, line := range csvLines {
+	for i, line := range csvLines {
 
 		fileName := "./player_" + line[1] + ".csv"
 
@@ -41,6 +41,9 @@ func main() {
 		w.Write(line)
 		w.Flush()
 		f.Close()
+		if i == 300 {
+			break
+		}
 
 	}
 
