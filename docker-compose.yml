@@ -49,3 +49,8 @@ services:
         ME_CONFIG_MONGODB_ADMINUSERNAME: footballiot
         ME_CONFIG_MONGODB_ADMINPASSWORD: footballiot
         ME_CONFIG_MONGODB_URL: mongodb://footballiot:footballiot@mongo-modified:27017/
+    
+    grafana:
+      image: grafana/grafana-enterprise
+      ports:
+        - 3000:3000
