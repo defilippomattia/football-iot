@@ -54,3 +54,26 @@ services:
       image: grafana/grafana-enterprise
       ports:
         - 3000:3000
+    
+    postgre-raw:
+      image: postgres
+      container_name: postgres-raw
+      environment: 
+          - DATABASE_HOST=localhost
+          - POSTGRES_USER=footballiot
+          - POSTGRES_PASSWORD=footballiot
+      ports: 
+            - "5532:5432"
+      volumes: 
+            - ./01_postgres_create_tables.sql:/docker-entrypoint-initdb.d/01_postgres_create_tables.sql
+
+    pgadmin:
+      container_name: pgadmin4_container
+      image: dpage/pgadmin4
+      restart: always
+      environment:
+        PGADMIN_DEFAULT_EMAIL: admin@admin.com
+        PGADMIN_DEFAULT_PASSWORD: root
+      ports:
+        - "5050:80"
+

@@ -17,16 +17,23 @@ const uri = "mongodb://footballiot:footballiot@localhost:27017/?maxPoolSize=20&w
 func main() {
 
 	type SensorReading struct {
-		TIMESTAMP     string  `avro:"timestamp"`
-		TAGID         int32   `avro:"tag_id"`
-		XPOS          float64 `avro:"x_pos"`
-		YPOS          float64 `avro:"y_pos"`
-		HEADING       float64 `avro:"heading"`
-		DIRECTION     float64 `avro:"direction"`
-		ENERGY        float64 `avro:"energy"`
-		SPEED         float64 `avro:"speed"`
-		TOTALDISTANCE float64 `avro:"total_distance"`
+		TIMESTAMP     string  `avro:"timestamp" db:"TIME_STAMP"`
+		TAGID         int32   `avro:"tag_id" db:"TAGID"`
+		XPOS          float64 `avro:"x_pos" db:"XPOS"`
+		YPOS          float64 `avro:"y_pos" db:"YPOS"`
+		HEADING       float64 `avro:"heading" db:"HEADING"`
+		DIRECTION     float64 `avro:"direction" db:"DIRECTION"`
+		ENERGY        float64 `avro:"energy" db:"ENERGY"`
+		SPEED         float64 `avro:"speed" db:"SPEED"`
+		TOTALDISTANCE float64 `avro:"total_distance" db:"TOTALDISTANCE"`
 	}
+
+	/*
+		type Page struct {
+		    PageId string                 `bson:"pageId" json:"pageId"`
+		    Meta   map[string]interface{} `bson:"meta" json:"meta"`
+		}
+	*/
 
 	schema, err := avro.Parse(`{
 		"type": "record",
@@ -68,6 +75,34 @@ func main() {
 			panic(err)
 		}
 	})
+
+	/*
+		import (
+			_ "github.com/lib/pq"
+			"github.com/jmoiron/sqlx"
+			"log"
+		)
+
+		type ApplyLeave1 struct {
+			LeaveId           int       `db:"leaveid"`
+			EmpId             string    `db:"empid"`
+			SupervisorEmpId   string    `db:"supervisorid"`
+		}
+
+		db, err := sqlx.Connect("postgres", "user=foo dbname=bar sslmode=disable")
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		query := `INSERT INTO TABLENAME(leaveid, empid, supervisorid)
+				VALUES(:leaveid, :empid, :supervisorid)`
+
+		var leave1 ApplyLeave1
+		_, err := db.NamedExec(query, leave1)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	*/
 
 	runtime.Goexit()
 
