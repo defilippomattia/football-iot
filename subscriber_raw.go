@@ -1,20 +1,26 @@
 package main
 
 import (
-	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"runtime"
 
 	"github.com/hamba/avro/v2"
+	_ "github.com/lib/pq"
 	"github.com/nats-io/nats.go"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const uri = "mongodb://footballiot:footballiot@localhost:27017/?maxPoolSize=20&w=majority"
 
 func main() {
+	const (
+		host     = "localhost"
+		port     = 5532
+		user     = "footballiot"
+		password = "footballiot"
+		dbname   = "footballiot"
+	)
 
 	type SensorReading struct {
 		TIMESTAMP     string  `avro:"timestamp" db:"TIME_STAMP"`
@@ -64,45 +70,50 @@ func main() {
 			log.Fatal(err)
 		}
 		fmt.Println(out)
+		psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+			"password=%s dbname=%s sslmode=disable",
+			host, port, user, password, dbname)
+		fmt.Println(psqlInfo)
+		db, err := sql.Open("postgres", psqlInfo)
+		if err != nil {
+			panic(err)
+		}
+		defer db.Close()
 
-		client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+		err = db.Ping()
 		if err != nil {
 			panic(err)
 		}
-		coll := client.Database("footballiot").Collection("raw-sensor-readings")
-		_, err = coll.InsertOne(context.TODO(), out)
+
+		sqlStatement := `
+			INSERT INTO public."RAW_SENSOR_DATA"
+			(TIME_STAMP, TAGID, XPOS, YPOS, HEADING, DIRECTION, ENERGY, SPEED, TOTALDISTANCE)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+			`
+		_, err = db.Exec(sqlStatement,
+			out.TIMESTAMP,
+			out.TAGID,
+			out.XPOS,
+			out.YPOS,
+			out.HEADING,
+			out.DIRECTION,
+			out.ENERGY,
+			out.SPEED,
+			out.TOTALDISTANCE)
 		if err != nil {
 			panic(err)
 		}
+		//mongo raw db...
+		// client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+		// if err != nil {
+		// 	panic(err)
+		// }
+		// coll := client.Database("footballiot").Collection("raw-sensor-readings")
+		// _, err = coll.InsertOne(context.TODO(), out)
+		// if err != nil {
+		// 	panic(err)
+		// }
 	})
-
-	/*
-		import (
-			_ "github.com/lib/pq"
-			"github.com/jmoiron/sqlx"
-			"log"
-		)
-
-		type ApplyLeave1 struct {
-			LeaveId           int       `db:"leaveid"`
-			EmpId             string    `db:"empid"`
-			SupervisorEmpId   string    `db:"supervisorid"`
-		}
-
-		db, err := sqlx.Connect("postgres", "user=foo dbname=bar sslmode=disable")
-		if err != nil {
-			log.Fatalln(err)
-		}
-
-		query := `INSERT INTO TABLENAME(leaveid, empid, supervisorid)
-				VALUES(:leaveid, :empid, :supervisorid)`
-
-		var leave1 ApplyLeave1
-		_, err := db.NamedExec(query, leave1)
-		if err != nil {
-			log.Fatalln(err)
-		}
-	*/
 
 	runtime.Goexit()
 
