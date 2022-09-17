@@ -8,27 +8,6 @@ services:
         - "6222:6222"
         - "8222:8222"
 
-    mongo-raw:
-      image: mongo
-      container_name: mongo-raw
-      restart: always
-      ports:
-        - 27017:27017
-      environment:
-        MONGO_INITDB_ROOT_USERNAME: footballiot
-        MONGO_INITDB_ROOT_PASSWORD: footballiot
-
-    mongo-raw-gui:
-      image: mongo-express
-      container_name: mongo-raw-gui
-      restart: always
-      ports:
-        - 8081:8081
-      environment:
-        ME_CONFIG_MONGODB_ADMINUSERNAME: footballiot
-        ME_CONFIG_MONGODB_ADMINPASSWORD: footballiot
-        ME_CONFIG_MONGODB_URL: mongodb://footballiot:footballiot@mongo-raw:27017/
-
     mongo-modified:
       image: mongo
       container_name: mongo-modified
@@ -52,6 +31,7 @@ services:
     
     grafana:
       image: grafana/grafana-enterprise
+      container_name: grafana
       ports:
         - 3000:3000
     
@@ -68,7 +48,7 @@ services:
             - ./01_postgres_create_tables.sql:/docker-entrypoint-initdb.d/01_postgres_create_tables.sql
 
     pgadmin:
-      container_name: pgadmin4_container
+      container_name: postgres-raw-gui
       image: dpage/pgadmin4
       restart: always
       environment:
@@ -76,4 +56,11 @@ services:
         PGADMIN_DEFAULT_PASSWORD: root
       ports:
         - "5050:80"
-
+    
+    vault-server:
+      container_name: vault-server
+      image: vault
+      ports:
+        - 8200:8200
+      environment:
+        VAULT_DEV_ROOT_TOKEN_ID: dev-only-token
