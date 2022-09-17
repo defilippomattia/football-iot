@@ -8,16 +8,22 @@ import (
 	"runtime"
 
 	"github.com/hamba/avro/v2"
+	vault "github.com/hashicorp/vault/api"
 	"github.com/nats-io/nats.go"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const uri = "mongodb://footballiot:footballiot@localhost:27018/?maxPoolSize=20&w=majority"
-
 func main() {
+	config := vault.DefaultConfig()
+	config.Address = "http://127.0.0.1:8200"
+	vault_client, err := vault.NewClient(config)
+	if err != nil {
+		log.Fatalf("unable to initialize Vault client: %v", err)
+	}
 
+	vault_client.SetToken("dev-only-token")
 	type SensorReading struct {
 		TIMESTAMP     string  `avro:"timestamp"`
 		TAGID         int32   `avro:"tag_id"`
@@ -70,7 +76,15 @@ func main() {
 			log.Fatal(err)
 		}
 		fmt.Println(out)
-
+		vault_secret, err := vault_client.KVv2("secret").Get(context.Background(), "football-iot-secret")
+		if err != nil {
+			log.Fatalf("unable to read secret: %v", err)
+		}
+		mongo_host, _ := vault_secret.Data["mongo_host"].(string)
+		mongo_password, _ := vault_secret.Data["mongo_password"].(string)
+		mongo_user, _ := vault_secret.Data["mongo_user"].(string)
+		mongo_port, _ := vault_secret.Data["mongo_port"].(string)
+		uri := "mongodb://" + mongo_user + ":" + mongo_password + "@" + mongo_host + ":" + mongo_port + "/?maxPoolSize=20&w=majority"
 		client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 		if err != nil {
 			panic(err)
