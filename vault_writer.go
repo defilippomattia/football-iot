@@ -38,14 +38,13 @@ func main() {
 
 	fmt.Println("Secret written successfully.")
 
-	/*
-		// Read a secret
-		secret, err := client.KVv2("secret").Get(context.Background(), "football-iot-secret")
-		if err != nil {
-			log.Fatalf("unable to read secret: %v", err)
-		}
+	// Read a secret
+	secret, err := client.KVv2("secret").Get(context.Background(), "football-iot-secret")
+	if err != nil {
+		log.Fatalf("unable to read secret: %v", err)
+	}
 
-		value, _ := secret.Data["mongo_password"].(string)
-		fmt.Println(value)
-	*/
+	value, _ := secret.Data["pg_port"].(string)
+	fmt.Println(value)
+
 }

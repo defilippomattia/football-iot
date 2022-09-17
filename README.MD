@@ -1,6 +1,6 @@
 # Introduction
 
-For learning purposes. Technology used: go, nats, grafana, mongo, postgres, hashicorp vault, docker
+For learning purposes. Technology used: go, nats, grafana, hashicorp vault, mongo, postgres, docker
 
 # Architecture
 
@@ -12,7 +12,8 @@ For learning purposes. Technology used: go, nats, grafana, mongo, postgres, hash
 **mongo** - nosql db  
 **postgres** - relatioanl db (used because postgres data source in grafana is free)  
 **grafana** - visualisation tool  
-**hashicorp vault** - storing secrets (not implemented yet)  
+**hashicorp vault** - storing secrets  
+**vault_writer.go** writes secrets to vault server
 
 ![alt text](https://github.com/defilippomattia/football-iot/blob/main/resources/other/architecture_diagram.png)
 
@@ -21,6 +22,7 @@ For learning purposes. Technology used: go, nats, grafana, mongo, postgres, hash
 ```
 git clone https://github.com/defilippomattia/football-iot.git  
 docker-compose up -d 
+go run vault_writer.go
 go run subscriber_raw.go
 go run subscriber_modified.go
 go run publisher.go

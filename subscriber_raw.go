@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"runtime"
 
 	"github.com/hamba/avro/v2"
+	vault "github.com/hashicorp/vault/api"
 	_ "github.com/lib/pq"
 	"github.com/nats-io/nats.go"
 )
@@ -14,13 +16,14 @@ import (
 const uri = "mongodb://footballiot:footballiot@localhost:27017/?maxPoolSize=20&w=majority"
 
 func main() {
-	const (
-		host     = "localhost"
-		port     = 5532
-		user     = "footballiot"
-		password = "footballiot"
-		dbname   = "footballiot"
-	)
+	config := vault.DefaultConfig()
+	config.Address = "http://127.0.0.1:8200"
+	vault_client, err := vault.NewClient(config)
+	if err != nil {
+		log.Fatalf("unable to initialize Vault client: %v", err)
+	}
+
+	vault_client.SetToken("dev-only-token")
 
 	type SensorReading struct {
 		TIMESTAMP     string  `avro:"timestamp" db:"TIME_STAMP"`
@@ -33,13 +36,6 @@ func main() {
 		SPEED         float64 `avro:"speed" db:"SPEED"`
 		TOTALDISTANCE float64 `avro:"total_distance" db:"TOTALDISTANCE"`
 	}
-
-	/*
-		type Page struct {
-		    PageId string                 `bson:"pageId" json:"pageId"`
-		    Meta   map[string]interface{} `bson:"meta" json:"meta"`
-		}
-	*/
 
 	schema, err := avro.Parse(`{
 		"type": "record",
@@ -70,9 +66,28 @@ func main() {
 			log.Fatal(err)
 		}
 		fmt.Println(out)
-		psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
+		// const (
+		// 	host     = "localhost"
+		// 	port     = 5532
+		// 	user     = "footballiot"
+		// 	password = "footballiot"
+		// 	dbname   = "footballiot"
+		// )
+
+		vault_secret, err := vault_client.KVv2("secret").Get(context.Background(), "football-iot-secret")
+		if err != nil {
+			log.Fatalf("unable to read secret: %v", err)
+		}
+
+		pg_host, _ := vault_secret.Data["pg_host"].(string)
+		pg_port, _ := vault_secret.Data["pg_port"].(string)
+		pg_user, _ := vault_secret.Data["pg_user"].(string)
+		pg_password, _ := vault_secret.Data["pg_password"].(string)
+		pg_dbname, _ := vault_secret.Data["pg_dbname"].(string)
+
+		psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 			"password=%s dbname=%s sslmode=disable",
-			host, port, user, password, dbname)
+			pg_host, pg_port, pg_user, pg_password, pg_dbname)
 		fmt.Println(psqlInfo)
 		db, err := sql.Open("postgres", psqlInfo)
 		if err != nil {
